@@ -1,25 +1,30 @@
-import logo from './logo.svg';
+import React from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './App.css';
 
+// Routes
+import RootLayout from './routes/Root';
+import HomePage from './routes/Home';
+import EventsPage from './routes/Events';
+import AccountPage from './routes/Account';
+
+// Router to handle links to different pages
+// routes wrapped under RootLayout to enable rendering navbar on each individual page
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <RootLayout />,
+    children: [
+        { path: '/', element: <HomePage /> },
+        { path: '/events', element: <EventsPage /> },
+        { path: '/account', element: <AccountPage /> }
+    ]
+  },
+
+]);
+
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  return <RouterProvider router = { router } />
 }
 
 export default App;

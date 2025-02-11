@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
+import classes from '../css/Navbar.module.css';
 
 function Navbar() {
   return (
-  <header>
+  <header className={classes.header}>
     <nav>
-      <ul>
+      <ul className={classes.list}>
         <li><Link to="/">Home</Link></li>
         <li><Link to="/events">Events</Link></li>
         <li><Link to="/account">Account</Link></li>

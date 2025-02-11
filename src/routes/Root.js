@@ -2,12 +2,13 @@
 // Enables rendering of Navbar on each route
 import { Outlet } from 'react-router-dom';
 import Navbar from '../components/Navbar.js';
+import classes from '../css/Root.module.css'
 
 function RootLayout() {
     return (
     <>
         <Navbar />
-        <main>
+        <main className={classes.content}>
             <Outlet />
         </main>        
     </>

@@ -6,28 +6,44 @@ import './css/App.css';
 import RootLayout from './routes/Root';
 import HomePage from './routes/Home';
 import EventsPage from './routes/Events';
+import EventDetailPage from './routes/EventDetail';
 import AccountPage from './routes/Account';
 import ErrorPage from './routes/Error';
 import LoginPage from './routes/Login';
+import RegisterPage from './routes/Register';
+
+import ProtectedRoutes from './utils/ProtectedRoutes';
+import { AuthProvider } from './utils/AuthContext';
 
 // Router to handle links to different pages
 // routes wrapped under RootLayout to enable rendering navbar on each individual page
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <RootLayout />,
+    element: <RootLayout />,     
     errorElement: <ErrorPage />,
     children: [
-        { path: 'login', element: <LoginPage />},
-        { path: '/', element: <HomePage /> },
-        { path: '/events', element: <EventsPage /> },
-        { path: '/account', element: <AccountPage /> }
-    ]
+        // index used to make this page default when parent route active
+          { path: 'login', element: <LoginPage />},
+          { path: 'register', element: <RegisterPage />},
+          { path: '/', 
+            element: <ProtectedRoutes />, 
+            children: [
+              { index: true, element: <HomePage /> },
+              { path: 'events', element: <EventsPage /> },
+              { path: 'account', element: <AccountPage /> },
+              { path: 'events/:eventID', element: <EventDetailPage /> }
+          ]}
+      ]
   },
 ]);
 
 function App() {
-  return <RouterProvider router = { router } />
+  return (
+    <AuthProvider>
+      <RouterProvider router = { router } />
+    </AuthProvider>
+  )
 }
 
 export default App;

@@ -1,64 +1,71 @@
-import React, { useState } from 'react';
-import { account, ID } from '../appwrite/config';
+import React, { useEffect, useRef } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../utils/AuthContext'
 
-const App = () => {
-  const [loggedInUser, setLoggedInUser] = useState(null);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
 
-  async function login(email, password) {
+const Login2 = () => {
+  const {user, loginUser} = useAuth()
+  const navigate = useNavigate()
 
-    // Log out current user if one is logged in
-    if(loggedInUser) {
-      await account.deleteSession('current');
-      setLoggedInUser(null);
+  const loginForm = useRef(null)
+
+  useEffect(() => {
+    if (user){
+      navigate('/')
     }
+  }, [])
 
-    // Log in user
-    await account.createEmailPasswordSession(email, password);
-    setLoggedInUser(await account.get());
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    const email = loginForm.current.email.value
+    const password = loginForm.current.password.value
+    
+    const userInfo = {email, password}
+
+    loginUser(userInfo)
   }
 
   return (
-    <div>
+    <div className="container">
+        <div className="login-register-container">
+          <form onSubmit={handleSubmit} ref={loginForm}> 
 
-      {/* Display username if logged in */}
-      <p>
-        {loggedInUser ? `Logged in as ${loggedInUser.name}` : 'Not logged in'}
-      </p>
+            <div className="form-field-wrapper">
+                <label>Email:</label>
+                <input 
+                  required
+                  type="email" 
+                  name="email"
+                  placeholder="Enter email..."
+                  />
+            </div>
 
-      <form>
-        <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-        <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
-        <input type="text" placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
+            <div className="form-field-wrapper">
+                <label>Password:</label>
+                <input 
+                  type="password" 
+                  name="password"
+                  placeholder="Enter password..."
+                  autoComplete="password"
+                  />
+            </div>
 
-        <button type="button" onClick={() => login(email, password)}>
-          Login
-        </button>
 
-        <button
-          type="button"
-          onClick={async () => {
-            await account.create(ID.unique(), email, password, name);
-            login(email, password);
-          }}
-        >
-          Register
-        </button>
+            <div className="form-field-wrapper">
+    
+                <input 
+                  type="submit" 
+                  value="Login"
+                  className="btn"
+                  />
+            </div>
+          </form>
 
-        <button
-          type="button"
-          onClick={async () => {
-            await account.deleteSession('current');
-            setLoggedInUser(null);
-          }}
-        >
-          Logout
-        </button>
-      </form>
+          <p>Don't have an account? <Link to="/register">Register</Link></p>
+
+        </div>
     </div>
-  );
-};
+  )
+}
 
-export default App;
+export default Login2

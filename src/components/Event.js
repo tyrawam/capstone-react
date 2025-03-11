@@ -1,8 +1,11 @@
 import {useState} from 'react';
+import { Link } from 'react-router-dom';
 import db from '../appwrite/databases';
 import DeleteIcon from '../assets/DeleteIcon';
+import { useAuth } from '../utils/AuthContext'
 
 function Event({ setEvents, eventData}) {
+    const {user, loginUser} = useAuth()
 
     // initial state
     const [event, setEvent] = useState(eventData)
@@ -17,22 +20,30 @@ function Event({ setEvents, eventData}) {
 
     // Delete an event
     const handleDelete = async() => {
-        db.events.delete(event.$id);
 
-        // Update state
-        setEvents((prevState) => prevState.filter((i) => i.$id !== event.$id));
-
+        if(user.$id == event.owner) {
+            db.events.delete(event.$id);
+            // Update state
+            setEvents((prevState) => prevState.filter((i) => i.$id !== event.$id));
+        }
+        else {
+            alert("You are not the owner of this event")
+        }
     }
 
     return (
     <>
         <div>
-            {/* {event.body} */}
-
             {/* if event is filled, strike it through */}
             <span onClick={handleUpdate}>
                 {event.filled ? <s>{event.body}</s> : <>{event.body}</>}
             </span>
+            <span>
+                {event.location}
+            </span>
+
+            {/* Link to specific event by passing id to events/:eventID route */}
+            <Link to={`/events/${event.$id}`}>View Details</Link>
 
             <div onClick={handleDelete}>
                 <DeleteIcon />

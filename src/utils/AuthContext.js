@@ -17,8 +17,6 @@ export const AuthProvider = ({ children }) => {
         if (user) await account.deleteSession('current');
 
         setLoading(true);
-
-        //console.log('UserInfo: ', userInfo);
         
         try {
             let response = await account.createEmailPasswordSession(
@@ -26,11 +24,9 @@ export const AuthProvider = ({ children }) => {
 
             let accountDetails = await account.get();
 
-            console.log("account: ", accountDetails);
-
             setUser(accountDetails);
         } catch (error) {
-            console.log(error); 
+            alert(error.message);
         }
 
         setLoading(false);
@@ -62,7 +58,7 @@ export const AuthProvider = ({ children }) => {
 
             setUser(accountDetails);
         } catch (error) {
-            console.log(error);
+            alert(error.message);
         }
 
         setLoading(false);

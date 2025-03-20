@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Query } from 'appwrite';
 import db from '../appwrite/databases';
 import { useAuth } from '../utils/AuthContext'
+import EventDetail from '../components/EventDetail';
 import defaultImage from '../assets/images/ted-johnsson-h2P_QmHvL-Y-unsplash.jpg';
 import DeleteIcon from '../assets/DeleteIcon';
 

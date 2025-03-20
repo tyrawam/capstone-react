@@ -8,7 +8,12 @@ const collections = [
         dbId: process.env.REACT_APP_DATABASE_ID,
         id: process.env.REACT_APP_COLLECTION_ID_EVENTS,
         name: "events",
-    },
+    }, 
+    {
+        dbId: process.env.REACT_APP_DATABASE_ID,
+        id: process.env.REACT_APP_COLLECTION_ID_USERS,
+        name: "users"
+    }
 ];
 
 // iterate through collection and attach to the empty db object

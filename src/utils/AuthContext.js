@@ -1,6 +1,6 @@
 import { useContext, useState, useEffect, createContext } from "react";
 import { account, ID } from "../appwrite/config";
-
+import db from '../appwrite/databases';
 
 const AuthContext = createContext();
 
@@ -57,6 +57,16 @@ export const AuthProvider = ({ children }) => {
             let accountDetails = await account.get();
 
             setUser(accountDetails);
+
+            // Save user to the user database
+            const userPayload = {
+                email: userInfo.email,
+                name: userInfo.name,
+                accountID: accountDetails.$id
+            };
+
+            await db.users.create(userPayload);
+
         } catch (error) {
             alert(error.message);
         }

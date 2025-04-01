@@ -34,20 +34,21 @@ function Event({ setEvents, eventData}) {
     return (
     <>
         <div>
+
             {/* if event is filled, strike it through */}
             <span onClick={handleUpdate}>
-                {event.filled ? <s>{event.body}</s> : <>{event.body}</>}
+                {event.filled ? <s>{event.title}</s> : <>{event.title}</>}
             </span>
-            <span>
+            {/* <span>
                 {event.location}
-            </span>
+            </span> */}
 
             {/* Link to specific event by passing id to events/:eventID route */}
             <Link to={`/events/${event.$id}`}>View Details</Link>
 
-            <div onClick={handleDelete}>
+            <span onClick={handleDelete}>
                 <DeleteIcon />
-            </div>
+            </span>
         </div>
     </>    
 )}

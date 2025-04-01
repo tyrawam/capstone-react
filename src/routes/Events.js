@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import db from '../appwrite/databases';
 import EventForm from '../components/EventForm';
-import { Query } from 'appwrite';                   // allows ordering of event list
+import { Query } from 'appwrite';
 import Event from '../components/Event';
 
 function EventsPage() {

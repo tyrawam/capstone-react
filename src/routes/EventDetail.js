@@ -1,6 +1,7 @@
 // useParams allows grabbing the event ID from the URL to display
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { GoogleMap, Marker, useLoadScript, Autocomplete } from '@react-google-maps/api';
+import { useEffect, useState, useRef } from 'react';
 import { Query } from 'appwrite';
 import db from '../appwrite/databases';
 import { useAuth } from '../utils/AuthContext'
@@ -16,6 +17,25 @@ function EventDetailPage() {
     const [ userDoc, setUserDoc ] = useState(null);
     const { user } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
+    const autocompleteRef = useRef(null);
+
+    // Load Google Maps script
+    const { isLoaded } = useLoadScript({
+        googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS,
+        libraries: ['places'],
+    });
+
+    const handlePlaceChanged = () => {
+        const place = autocompleteRef.current.getPlace();
+        if (place.geometry) {
+            setEvent((prevEvent) => ({
+                ...prevEvent,
+                location: place.formatted_address,
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng(),
+            }));
+        }
+    };
 
     // fetch event document
     useEffect(() => {
@@ -37,7 +57,6 @@ function EventDetailPage() {
             try {
                 const response = await db.users.list([Query.equal('accountID', user.$id)])
                 console.log("Fetched user response:", response); 
-
                 
                 if(response.total > 0) {
                     setUserDoc(response.documents[0]);
@@ -202,9 +221,7 @@ function EventDetailPage() {
         <h1>Event Details</h1>
         
         {event ? (
-
             <>
-            {/* {console.log("Event Volunteer List:", event.volunteerList)} */}
             <div className="row">
                 <div className="col-4 offset-2">
                     <div className="card mb-3">
@@ -220,6 +237,8 @@ function EventDetailPage() {
                                         title: e.target.title.value,
                                         body: e.target.body.value,
                                         location: e.target.location.value,
+                                        lat: event.lat,
+                                        lng: event.lng,
                                         date: e.target.date.value,
                                         startTime: e.target.startTime.value,
                                     };
@@ -235,10 +254,21 @@ function EventDetailPage() {
                                     <span className="input-group-text">Desc.</span>
                                     <textarea className="form-control" name="body" defaultValue={event.body} required />
                                 </div>
-                                
+
                                 <div className="input-group mb-3">
-                                    <span className="input-group-text">Loc.</span>
-                                    <input className="form-control" name="location" defaultValue={event.location} required />
+                                    <span className="input-group-text">Location</span>
+                                    <Autocomplete
+                                        onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
+                                        onPlaceChanged={handlePlaceChanged}
+                                    >
+                                        <input
+                                            className="form-control"
+                                            name="location"
+                                            placeholder="Search for a location"
+                                            defaultValue={event.location}
+                                            required
+                                        />
+                                    </Autocomplete>
                                 </div>
                                 
                                 <div className="input-group mb-3">
@@ -255,12 +285,6 @@ function EventDetailPage() {
                                         ))}
                                     </select>
                                 </div>
-
-                                
-                                {/* <div className="input-group mb-3">
-                                    <span className="input-group-text">Start Time</span>
-                                    <input className="form-control" name="startTime" type="time" defaultValue={event.startTime} required />
-                                </div> */}
 
                                 <button type="submit" className="btn btn-success me-3">Save</button>
                                 <button type="button" className="btn btn-danger" onClick={() => setIsEditing(false)}>Cancel</button>
@@ -318,8 +342,36 @@ function EventDetailPage() {
 
                 <div className="col-4">
                     <EventDetailList volunteerList={event.volunteerList} spots={event.spots} />
-                </div>
+                    <div className="mt-5" style={{ height: '400px', width: '100%' }}>
+                        <GoogleMap
+                            mapContainerStyle={{ width: '100%', height: '100%' }}
+                            center={{
+                                lat: event.lat || 0,
+                                lng: event.lng || 0,
+                            }}
+                            zoom={15}                            
+                        >
+                            <Marker
+                                position={{
+                                    lat: event.lat || 0,
+                                    lng: event.lng || 0,
+                                }}
+                            />
+                        </GoogleMap>
+                    </div>
 
+                    {/* Get Directions Button */}
+                    <div className="mt-3">
+                        <a
+                            href={`https://www.google.com/maps/dir/?api=1&destination=${event.lat},${event.lng}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-primary"
+                        >
+                            Get Directions
+                        </a>
+                    </div>
+                </div>
             </div>
             </>
         ) : (

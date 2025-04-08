@@ -1,9 +1,19 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
+import { Autocomplete, useLoadScript } from '@react-google-maps/api';
 import db from '../appwrite/databases';
 import { useAuth } from '../utils/AuthContext'
 
 function EventForm({ setEvents }) {
     const { user, loginUser } = useAuth()
+    const [location, setLocation] = useState('');
+    const [latLng, setLatLng] = useState({ lat: null, lng: null });
+    const autocompleteRef = useRef(null);
+
+    // Load Google Maps script
+    const { isLoaded } = useLoadScript({
+        googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS,
+        libraries: ['places'],
+    });
 
     const handleAdd = async (e) => {
         // prevent default form behavior
@@ -11,7 +21,7 @@ function EventForm({ setEvents }) {
 
         // Get the value from the body input field
         const eventBody = e.target.body.value
-        const eventLocation = e.target.location.value
+        // const eventLocation = e.target.location.value
         const eventTitle = e.target.title.value
         const eventDate = e.target.date.value
         const eventTime = e.target.startTime.value
@@ -49,7 +59,9 @@ function EventForm({ setEvents }) {
                 body: eventBody,
                 ownerID: user.$id,
                 ownerName: user.name,
-                location: eventLocation,
+                location: location,
+                lat: latLng.lat,
+                lng: latLng.lng,
                 title: eventTitle,
                 date: eventDate,
                 startTime: timeString,
@@ -63,10 +75,25 @@ function EventForm({ setEvents }) {
 
             // Reset the form after submitting input
             e.target.reset();
+            setLocation('');
+            setLatLng({ lat: null, lng: null });
         } catch (err) {
             console.error(err);
         }
     }
+
+    const handlePlaceChanged = () => {
+        const place = autocompleteRef.current.getPlace();
+        if (place.geometry) {
+            setLocation(place.formatted_address);
+            setLatLng({
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng(),
+            });
+        }
+    };
+
+    if (!isLoaded) return <p>Loading...</p>;
 
     // Get today's date in YYYY-MM-DD format
     const today = new Date().toISOString().split('T')[0];
@@ -98,8 +125,20 @@ function EventForm({ setEvents }) {
                         </div>
 
                         <div className="mb-3">
-                            <label className="form-label" for="location">Location</label>
-                            <input type='text' name='location' placeholder='Event Location' className="form-control"/>
+                            <label className="form-label" htmlFor="location">Location</label>
+                            <Autocomplete
+                                onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
+                                onPlaceChanged={handlePlaceChanged}
+                            >
+                                <input
+                                    type="text"
+                                    name="location"
+                                    placeholder="Search for a location"
+                                    className="form-control"
+                                    value={location}
+                                    onChange={(e) => setLocation(e.target.value)}
+                                />
+                            </Autocomplete>
                         </div>
 
                         <div className="mb-3">
@@ -131,7 +170,6 @@ function EventForm({ setEvents }) {
             </div>
         </div>
         </>
-
     )
 }
 

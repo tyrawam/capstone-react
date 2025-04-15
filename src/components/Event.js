@@ -1,56 +1,26 @@
-import {useState} from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import db from '../appwrite/databases';
-import DeleteIcon from '../assets/DeleteIcon';
-import { useAuth } from '../utils/AuthContext'
 
-function Event({ setEvents, eventData}) {
-    const {user, loginUser} = useAuth()
-
+function Event({ eventData }) {
     // initial state
-    const [event, setEvent] = useState(eventData)
+    const [event] = useState(eventData)
 
-    // Update event's filled state (True or False)
-    const handleUpdate = async() => {
-        const filled = !event.filled
-        db.events.update(event.$id, {filled});
-        // Update state
-        setEvent({...event, filled:filled});
-    }
-
-    // Delete an event
-    const handleDelete = async() => {
-
-        if(user.$id == event.owner) {
-            db.events.delete(event.$id);
-            // Update state
-            setEvents((prevState) => prevState.filter((i) => i.$id !== event.$id));
-        }
-        else {
-            alert("You are not the owner of this event")
-        }
-    }
 
     return (
-    <>
-        <div>
+        <div className="card mb-3">
+            <div className="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 className="card-title mb-1">{event.date} | {event.title} </h5>
+                    <p className="card-text text-muted">{event.location}</p>
+                </div>
 
-            {/* if event is filled, strike it through */}
-            <span onClick={handleUpdate}>
-                {event.filled ? <s>{event.title}</s> : <>{event.title}</>}
-            </span>
-            {/* <span>
-                {event.location}
-            </span> */}
-
-            {/* Link to specific event by passing id to events/:eventID route */}
-            <Link to={`/events/${event.$id}`}>View Details</Link>
-
-            <span onClick={handleDelete}>
-                <DeleteIcon />
-            </span>
+                <Link to={`/events/${event.$id}`} className="btn btn-primary">
+                    View
+                </Link>
+            </div>
         </div>
-    </>    
-)}
+    )
+}
 
 export default Event;
+

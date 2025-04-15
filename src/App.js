@@ -2,12 +2,12 @@ import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './css/App.css';
 
-
 // Routes
 import RootLayout from './routes/Root';
 import HomePage from './routes/Home';
 import EventsPage from './routes/Events';
 import EventDetailPage from './routes/EventDetail';
+import EventFormPage from './routes/EventForm';
 import AccountPage from './routes/Account';
 import ErrorPage from './routes/Error';
 import LoginPage from './routes/Login';
@@ -31,8 +31,9 @@ const router = createBrowserRouter([
             element: <ProtectedRoutes />, 
             children: [
               { index: true, element: <HomePage /> },
-              { path: 'events', element: <EventsPage /> },
               { path: 'account', element: <AccountPage /> },
+              { path: 'events', element: <EventsPage /> },
+              { path: 'events/form', element: <EventFormPage /> },
               { path: 'events/:eventID', element: <EventDetailPage /> }
           ]}
       ]

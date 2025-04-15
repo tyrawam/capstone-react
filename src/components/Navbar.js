@@ -26,6 +26,11 @@ function Navbar() {
             </NavLink>
           </li>
           <li>
+            <NavLink to="/events/form" className={({isActive}) => isActive ? classes.active : undefined}>
+              Create Event
+            </NavLink>
+          </li>
+          <li>
             <NavLink to="/account" className={({isActive}) => isActive ? classes.active : undefined}> 
               Account
             </NavLink>
@@ -34,7 +39,7 @@ function Navbar() {
             <button onClick={logoutUser}>Logout</button>
           </li>
         </>) : (
-          <NavLink to="/login">Login</NavLink>
+          <></>
         )}
       </ul>
     </nav>

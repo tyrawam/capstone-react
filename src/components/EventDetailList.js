@@ -35,7 +35,7 @@ const EventDetailList = ({ volunteerList, spots }) => {
     return (
         <div className="card">
             <div className="card-header">
-                <h5>Registered Users</h5>
+            <h5>Registered Users - {openSpots} more volunteers needed!</h5>
             </div>
             <ul className="list-group list-group-flush">
                 {/* Display registered user names */}

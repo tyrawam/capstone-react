@@ -7,6 +7,7 @@ function EventForm({ setEvents }) {
     const { user, loginUser } = useAuth()
     const [location, setLocation] = useState('');
     const [latLng, setLatLng] = useState({ lat: null, lng: null });
+    const [imageReference, setImageReference] = useState(null);
     const autocompleteRef = useRef(null);
 
     // Load Google Maps script
@@ -65,7 +66,8 @@ function EventForm({ setEvents }) {
                 title: eventTitle,
                 date: eventDate,
                 startTime: timeString,
-                spots: eventSpots
+                spots: eventSpots,
+                image: imageReference
             }
 
             const response = await db.events.create(payload)
@@ -90,6 +92,10 @@ function EventForm({ setEvents }) {
                 lat: place.geometry.location.lat(),
                 lng: place.geometry.location.lng(),
             });
+
+            // Get the first photo reference if available
+            const photoReference = place.photos && place.photos.length > 0 ? place.photos[0].getUrl() : null;
+            setImageReference(photoReference);
         }
     };
 

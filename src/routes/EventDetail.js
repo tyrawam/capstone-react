@@ -12,9 +12,9 @@ import EventDetailList from '../components/EventDetailList';
 function EventDetailPage() {
     const { eventID } = useParams();
     const navigate = useNavigate();
-    
+
     const [event, setEvent] = useState(null);
-    const [ userDoc, setUserDoc ] = useState(null);
+    const [userDoc, setUserDoc] = useState(null);
     const { user } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const autocompleteRef = useRef(null);
@@ -28,11 +28,13 @@ function EventDetailPage() {
     const handlePlaceChanged = () => {
         const place = autocompleteRef.current.getPlace();
         if (place.geometry) {
+            const photoReference = place.photos && place.photos.length > 0 ? place.photos[0].getUrl() : null;
             setEvent((prevEvent) => ({
                 ...prevEvent,
                 location: place.formatted_address,
                 lat: place.geometry.location.lat(),
                 lng: place.geometry.location.lng(),
+                image: photoReference || defaultImage
             }));
         }
     };
@@ -56,9 +58,8 @@ function EventDetailPage() {
         const fetchUserDoc = async () => {
             try {
                 const response = await db.users.list([Query.equal('accountID', user.$id)])
-                console.log("Fetched user response:", response); 
-                
-                if(response.total > 0) {
+
+                if (response.total > 0) {
                     setUserDoc(response.documents[0]);
                 } else {
                     console.log("No user found");
@@ -72,13 +73,18 @@ function EventDetailPage() {
     }, []);
 
     // Delete an event
-    const handleDelete = async() => {
+    const handleDelete = async () => {
 
         if (user.$id !== event.ownerID) {
             alert("You are not the owner of this event");
             return;
         }
-    
+
+        const confirmDelete = window.confirm("Are you sure you want to delete this event?");
+        if (!confirmDelete) {
+            return;
+        }
+
         try {
             // Iterate through the volunteerList and update each user's events array
             if (event.volunteerList && event.volunteerList.length > 0) {
@@ -88,18 +94,18 @@ function EventDetailPage() {
                         const response = await db.users.list([Query.equal('accountID', accountId)]);
                         if (response.total > 0) {
                             const userDoc = response.documents[0];
-    
+
                             // Remove the event ID from the user's events array
                             const updatedEvents = userDoc.events
                                 ? userDoc.events.filter(eventId => eventId !== event.$id)
                                 : [];
-    
+
                             // Create a new object without Appwrite metadeta to prevent error
                             const { $databaseId, $collectionId, ...updatedUserDoc } = {
                                 ...userDoc,
                                 events: updatedEvents,
                             };
-    
+
                             // Update the user document in the database
                             await db.users.update(userDoc.$id, updatedUserDoc);
                         }
@@ -108,7 +114,7 @@ function EventDetailPage() {
                     }
                 }
             }
-    
+
             // Delete the event document
             await db.events.delete(event.$id);
             console.log("Event deleted successfully");
@@ -122,7 +128,7 @@ function EventDetailPage() {
         try {
             // Create a new object without Appwrite metadata to prevent error
             const { $databaseId, $collectionId, ...eventPayload } = updatedEvent;
-    
+
             // Update the event document
             await db.events.update(event.$id, eventPayload);
             setEvent(updatedEvent);
@@ -147,7 +153,6 @@ function EventDetailPage() {
         try {
             await db.events.update(event.$id, updatedEvent);
             setEvent(updatedEvent);
-            console.log("Updated event response:", updatedEvent);
         } catch (error) {
             console.error("Failed to update event:", error);
         }
@@ -162,7 +167,6 @@ function EventDetailPage() {
         try {
             await db.users.update(userDoc.$id, updatedUserDoc);
             setUserDoc(updatedUserDoc);
-            console.log("Updated users response:", updatedUserDoc);
         } catch (error) {
             console.error("Failed to update users:", error);
         }
@@ -182,7 +186,6 @@ function EventDetailPage() {
         try {
             await db.users.update(userDoc.$id, updatedUserDoc);
             setUserDoc(updatedUserDoc);
-            console.log("Updated user document after canceling registration:", updatedUserDoc);
         } catch (error) {
             console.error("Failed to update user document:", error);
         }
@@ -197,7 +200,6 @@ function EventDetailPage() {
         try {
             await db.events.update(event.$id, updatedEvent);
             setEvent(updatedEvent);
-            console.log("Updated event document after canceling registration:", updatedEvent);
         } catch (error) {
             console.error("Failed to update event document:", error);
         }
@@ -218,167 +220,162 @@ function EventDetailPage() {
 
     return (
         <>
-        <h1>Event Details</h1>
-        
-        {event ? (
-            <>
-            <div className="row">
-                <div className="col-4 offset-2">
-                    <div className="card mb-3">
-                        <img className="card-img-top" src={defaultImage} alt="Card image cap" />
-                        <div className="card-body">
+            <h1>Event Details</h1>
 
-                        {isEditing ? (
-                            <form
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    const updatedEvent = {
-                                        ...event,
-                                        title: e.target.title.value,
-                                        body: e.target.body.value,
-                                        location: e.target.location.value,
-                                        lat: event.lat,
-                                        lng: event.lng,
-                                        date: e.target.date.value,
-                                        startTime: e.target.startTime.value,
-                                    };
-                                    handleEditSubmit(updatedEvent);
-                                }}
-                            >             
-                                <div className="input-group mb-3">  
-                                    <span className="input-group-text">Title</span>                 
-                                    <input className="form-control" name="title" defaultValue={event.title} required />
+            {event ? (
+                <>
+                    <div className="row">
+                        <div className="col-4 offset-2">
+                            <div className="card mb-3">
+                                <img className="card-img-top" src={event.image} alt="Card image cap" />
+                                <div className="card-body">
+
+                                    {isEditing ? (
+                                        <form
+                                            onSubmit={(e) => {
+                                                e.preventDefault();
+                                                const updatedEvent = {
+                                                    ...event,
+                                                    title: e.target.title.value,
+                                                    body: e.target.body.value,
+                                                    location: e.target.location.value,
+                                                    lat: event.lat,
+                                                    lng: event.lng,
+                                                    date: e.target.date.value,
+                                                    startTime: e.target.startTime.value,
+                                                };
+                                                handleEditSubmit(updatedEvent);
+                                            }}
+                                        >
+                                            <div className="input-group mb-3">
+                                                <span className="input-group-text">Title</span>
+                                                <input className="form-control" name="title" defaultValue={event.title} required />
+                                            </div>
+
+                                            <div className="input-group mb-3">
+                                                <span className="input-group-text">Desc.</span>
+                                                <textarea className="form-control" name="body" defaultValue={event.body} required />
+                                            </div>
+
+                                            <div className="input-group mb-3">
+                                                <span className="input-group-text">Location</span>
+                                                <Autocomplete
+                                                    onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
+                                                    onPlaceChanged={handlePlaceChanged}
+                                                >
+                                                    <input
+                                                        className="form-control"
+                                                        name="location"
+                                                        placeholder="Search for a location"
+                                                        defaultValue={event.location}
+                                                        required
+                                                    />
+                                                </Autocomplete>
+                                            </div>
+
+                                            <div className="input-group mb-3">
+                                                <span className="input-group-text">Date</span>
+                                                <input className="form-control" name="date" type="date" defaultValue={event.date} required />
+                                            </div>
+
+
+                                            <div className="input-group mb-3">
+                                                <span className="input-group-text">Time</span>
+                                                <select name="startTime" className="form-control" defaultValue={event.startTime} required>
+                                                    {generateTimeOptions().map((time) => (
+                                                        <option key={time} value={time}>{time}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <button type="submit" className="btn btn-success me-3">Save</button>
+                                            <button type="button" className="btn btn-danger" onClick={() => setIsEditing(false)}>Cancel</button>
+
+                                        </form>
+                                    ) : (
+                                        <>
+                                            <h5 className="card-title"><b>{event.title}</b></h5>
+                                            <p className="card-text">{event.body}</p>
+                                            <ul className="list-group list-group-flush">
+                                                <li className="list-group-item">{event.location}</li>
+                                                <li className="list-group-item">{event.date} at {event.startTime}</li>
+                                                <li className="list-group-item text-secondary">Submitted by: {event.ownerName}</li>
+
+                                            </ul>
+                                        </>
+                                    )}
+
                                 </div>
-                                
-                                <div className="input-group mb-3">
-                                    <span className="input-group-text">Desc.</span>
-                                    <textarea className="form-control" name="body" defaultValue={event.body} required />
-                                </div>
 
-                                <div className="input-group mb-3">
-                                    <span className="input-group-text">Location</span>
-                                    <Autocomplete
-                                        onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
-                                        onPlaceChanged={handlePlaceChanged}
-                                    >
-                                        <input
-                                            className="form-control"
-                                            name="location"
-                                            placeholder="Search for a location"
-                                            defaultValue={event.location}
-                                            required
-                                        />
-                                    </Autocomplete>
-                                </div>
-                                
-                                <div className="input-group mb-3">
-                                    <span className="input-group-text">Date</span>
-                                    <input className="form-control" name="date" type="date" defaultValue={event.date} required />
-                                </div>
+                                {user.$id === event.ownerID && !isEditing && (
+                                    <button onClick={() => setIsEditing(true)}>
+                                        Edit Event
+                                    </button>
+                                )}
 
+                                {user.$id === event.ownerID && !isEditing && (
+                                    <div onClick={handleDelete}>
+                                        <DeleteIcon />
+                                    </div>
+                                )}
 
-                                <div className="input-group mb-3">
-                                    <span className="input-group-text">Time</span>
-                                    <select name="startTime" className="form-control" defaultValue={event.startTime} required>
-                                        {generateTimeOptions().map((time) => (
-                                            <option key={time} value={time}>{time}</option>
-                                        ))}
-                                    </select>
-                                </div>
+                                {user.$id !== event.ownerID && event.volunteerList.length < event.spots && userDoc && !(userDoc.events || []).includes(event.$id) && (
+                                    <div>
+                                        <button onClick={() => handleRegister(eventID)}>Register for this event</button>
+                                    </div>
+                                )}
 
-                                <button type="submit" className="btn btn-success me-3">Save</button>
-                                <button type="button" className="btn btn-danger" onClick={() => setIsEditing(false)}>Cancel</button>
-                            
-                            </form>
-                        ) : (      
-                            <>                  
-                            <h5 className="card-title">{event.title}</h5>
-                            <p className="card-text">{event.body}</p>
-                            <ul className="list-group list-group-flush">
-                                <li className="list-group-item text-secondary">{event.location}</li>
-                                <li className="list-group-item">Submitted by: {event.ownerName}</li>
-                                <li className="list-group-item">{event.date} at {event.startTime}</li>
-                            </ul>
-                        </>
-                        )}
+                                {user.$id !== event.ownerID && userDoc && (userDoc.events || []).includes(event.$id) && (
+                                    <div>
+                                        <button onClick={handleCancelRegistration}>Cancel Registration</button>
+                                    </div>
+                                )}
 
+                            </div>
                         </div>
 
-                        {/* {user.$id === event.ownerID && (
-                            <button onClick={() => setIsEditing(!isEditing)}>
-                                {isEditing ? "Cancel Edit" : "Edit Event"}
-                            </button>
-                        )} */}
+                        {/* Event Detail List */}
 
-
-                        {user.$id === event.ownerID && !isEditing && (
-                            <button onClick={() => setIsEditing(true)}>
-                                Edit Event
-                            </button>
-                        )}
-
-                        {user.$id === event.ownerID && !isEditing && (
-                            <div onClick={handleDelete}>
-                                <DeleteIcon />
+                        <div className="col-4">
+                            <EventDetailList volunteerList={event.volunteerList} spots={event.spots} />
+                            <div className="mt-5" style={{ height: '400px', width: '100%' }}>
+                                <GoogleMap
+                                    mapContainerStyle={{ width: '100%', height: '100%' }}
+                                    center={{
+                                        lat: event.lat || 0,
+                                        lng: event.lng || 0,
+                                    }}
+                                    zoom={15}
+                                >
+                                    <Marker
+                                        position={{
+                                            lat: event.lat || 0,
+                                            lng: event.lng || 0,
+                                        }}
+                                    />
+                                </GoogleMap>
                             </div>
-                        )}
 
-                        {user.$id !== event.ownerID && event.volunteerList.length < event.spots && userDoc && !(userDoc.events || []).includes(event.$id) && (
-                            <div>
-                                <button onClick={() => handleRegister(eventID)}>Register for this event</button>
+                            {/* Get Directions Button */}
+                            <div className="mt-3">
+                                <a
+                                    href={`https://www.google.com/maps/dir/?api=1&destination=${event.lat},${event.lng}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn btn-primary"
+                                >
+                                    Get Directions
+                                </a>
                             </div>
-                        )}
-
-                        {user.$id !== event.ownerID && userDoc && (userDoc.events || []).includes(event.$id) && (
-                            <div>
-                                <button onClick={handleCancelRegistration}>Cancel Registration</button>
-                            </div>
-                        )}
-
+                        </div>
                     </div>
-                </div>
-
-                {/* Event Detail List */}
-
-                <div className="col-4">
-                    <EventDetailList volunteerList={event.volunteerList} spots={event.spots} />
-                    <div className="mt-5" style={{ height: '400px', width: '100%' }}>
-                        <GoogleMap
-                            mapContainerStyle={{ width: '100%', height: '100%' }}
-                            center={{
-                                lat: event.lat || 0,
-                                lng: event.lng || 0,
-                            }}
-                            zoom={15}                            
-                        >
-                            <Marker
-                                position={{
-                                    lat: event.lat || 0,
-                                    lng: event.lng || 0,
-                                }}
-                            />
-                        </GoogleMap>
-                    </div>
-
-                    {/* Get Directions Button */}
-                    <div className="mt-3">
-                        <a
-                            href={`https://www.google.com/maps/dir/?api=1&destination=${event.lat},${event.lng}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn btn-primary"
-                        >
-                            Get Directions
-                        </a>
-                    </div>
-                </div>
-            </div>
-            </>
-        ) : (
-            <p>Loading...</p>
-        )}
-        <p><Link to='..' relative='path'>Back</Link></p>
-    </>
-)}
+                </>
+            ) : (
+                <p>Loading...</p>
+            )}
+            <p><Link to='..' relative='path' className="btn btn-secondary">Back</Link></p>
+        </>
+    )
+}
 
 export default EventDetailPage;

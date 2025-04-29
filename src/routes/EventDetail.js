@@ -10,12 +10,13 @@ import DeleteIcon from '../assets/DeleteIcon';
 import EventDetailList from '../components/EventDetailList';
 
 function EventDetailPage() {
+    const { user } = useAuth();
     const { eventID } = useParams();
     const navigate = useNavigate();
 
     const [event, setEvent] = useState(null);
     const [userDoc, setUserDoc] = useState(null);
-    const { user } = useAuth();
+    const [ownerEmail, setOwnerEmail] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const autocompleteRef = useRef(null);
 
@@ -45,6 +46,13 @@ function EventDetailPage() {
             try {
                 const response = await db.events.get(eventID);
                 setEvent(response);
+
+                // Fetch the owner's email
+                const ownerEmail = await db.users.list([Query.equal('accountID', response.ownerID)]);
+                if (ownerEmail.total > 0) {
+                    setOwnerEmail(ownerEmail.documents[0].email);
+
+                }
             } catch (error) {
                 console.error("Failed to fetch event details:", error);
             }
@@ -234,6 +242,20 @@ function EventDetailPage() {
                                         <form
                                             onSubmit={(e) => {
                                                 e.preventDefault();
+
+                                                const updatedSpots = parseInt(e.target.spots.value);
+                                                const registeredUsers = event.volunteerList.length;
+
+                                                if (updatedSpots < 1) {
+                                                    alert("You must have at least one spot available.");
+                                                    return;
+                                                }
+                                                
+                                                if (updatedSpots < registeredUsers) {
+                                                    alert("You cannot reduce the number of spots below the number of registered users.");
+                                                    return;
+                                                }
+
                                                 const updatedEvent = {
                                                     ...event,
                                                     title: e.target.title.value,
@@ -241,6 +263,7 @@ function EventDetailPage() {
                                                     location: e.target.location.value,
                                                     lat: event.lat,
                                                     lng: event.lng,
+                                                    spots: parseInt(e.target.spots.value),
                                                     date: e.target.date.value,
                                                     startTime: e.target.startTime.value,
                                                 };
@@ -259,18 +282,25 @@ function EventDetailPage() {
 
                                             <div className="input-group mb-3">
                                                 <span className="input-group-text">Location</span>
-                                                <Autocomplete
-                                                    onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
-                                                    onPlaceChanged={handlePlaceChanged}
-                                                >
-                                                    <input
-                                                        className="form-control"
-                                                        name="location"
-                                                        placeholder="Search for a location"
-                                                        defaultValue={event.location}
-                                                        required
-                                                    />
-                                                </Autocomplete>
+                                                <div style={{ flex: 1 }}>
+                                                    <Autocomplete
+                                                        onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
+                                                        onPlaceChanged={handlePlaceChanged}
+                                                    >
+                                                        <input
+                                                            className="form-control"
+                                                            name="location"
+                                                            placeholder="Search for a location"
+                                                            defaultValue={event.location}
+                                                            required
+                                                        />
+                                                    </Autocomplete>
+                                                </div>
+                                            </div>
+
+                                            <div className="input-group mb-3">
+                                                <span className="input-group-text">Spots</span>
+                                                <input className="form-control" name="spots" defaultValue={event.spots} required />
                                             </div>
 
                                             <div className="input-group mb-3">
@@ -299,7 +329,8 @@ function EventDetailPage() {
                                             <ul className="list-group list-group-flush">
                                                 <li className="list-group-item">{event.location}</li>
                                                 <li className="list-group-item">{event.date} at {event.startTime}</li>
-                                                <li className="list-group-item text-secondary">Submitted by: {event.ownerName}</li>
+                                                <li className="list-group-item text-secondary">Submitted by: {event.ownerName} {" "} 
+                                                    <a href={`mailto:${ownerEmail}?subject=Inquiry about your event: ${event.title}`}>{"(Send them an email!)"}</a></li>
 
                                             </ul>
                                         </>

@@ -27,6 +27,7 @@ const router = createBrowserRouter([
         // index used to make this page default when parent route active
           { path: 'login', element: <LoginPage />},
           { path: 'register', element: <RegisterPage />},
+          { index: true, element: <HomePage /> },
           { path: '/', 
             element: <ProtectedRoutes />, 
             children: [

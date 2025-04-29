@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Autocomplete, useLoadScript } from '@react-google-maps/api';
 import db from '../appwrite/databases';
 import { useAuth } from '../utils/AuthContext'
@@ -9,6 +10,7 @@ function EventForm({ setEvents }) {
     const [latLng, setLatLng] = useState({ lat: null, lng: null });
     const [imageReference, setImageReference] = useState(null);
     const autocompleteRef = useRef(null);
+    const navigate = useNavigate();
 
     // Load Google Maps script
     const { isLoaded } = useLoadScript({
@@ -75,10 +77,8 @@ function EventForm({ setEvents }) {
             // Update the state: New object gets added onto the state
             setEvents((prevState) => [response, ...prevState])
 
-            // Reset the form after submitting input
-            e.target.reset();
-            setLocation('');
-            setLatLng({ lat: null, lng: null });
+            // Redirect to the event details page after adding the even
+            navigate(`/events/${response.$id}`);
         } catch (err) {
             console.error(err);
         }

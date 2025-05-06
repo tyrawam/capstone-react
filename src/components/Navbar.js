@@ -8,7 +8,7 @@ function Navbar() {
 
   const navigate = useNavigate();
 
-  const { user, logoutUser } = useAuth(); // Destructure user from useAuth hook
+  const { user, logoutUser } = useAuth();
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -40,7 +40,7 @@ function Navbar() {
                   Account
                 </a>
                 {user ? (
-                  <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                     <li><a className="dropdown-item" href="/account">My Page</a></li>
                     <li><a className="dropdown-item" href="#" onClick={(e) => {
                       e.preventDefault();
@@ -48,7 +48,7 @@ function Navbar() {
                     }}>Log Out</a></li>
                   </ul>
                 ) : (
-                  <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                     <li><a className="dropdown-item" href="/register">Create an Account</a></li>
                     <li><a className="dropdown-item" href="/login">Log In</a></li>
                   </ul>

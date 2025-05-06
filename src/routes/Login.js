@@ -12,7 +12,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/')
+      navigate('/events')
     }
   }, [])
 

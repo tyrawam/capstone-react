@@ -75,7 +75,6 @@ export const AuthProvider = ({ children }) => {
     };
 
     const checkUserStatus = async () => {
-
         try {
             let accountDetails = await account.get();
             setUser(accountDetails);
@@ -95,7 +94,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={contextData}>
-            { loading ? <p>loading...</p> : children }
+            { loading ? <div className="vh-100 d-flex justify-content-center align-items-center"><p>Loading...</p></div> : children }
         </AuthContext.Provider>        
     )
 }

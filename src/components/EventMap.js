@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { GoogleMap, Marker, InfoWindow, useLoadScript } from '@react-google-maps/api';
 import { Link } from 'react-router-dom';
 
@@ -12,7 +12,7 @@ function EventMap({ events }) {
     });
 
     if (!isLoaded) {
-        return <p>Loading map...</p>;
+        return <div className="vh-100 d-flex justify-content-center align-items-center"><p>Loading...</p></div>;
     }
 
     const defaultCenter = events.length > 0

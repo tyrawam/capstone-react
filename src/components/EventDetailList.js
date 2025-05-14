@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import db from '../appwrite/databases';
 import { Query } from 'appwrite';
 

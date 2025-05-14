@@ -1,13 +1,7 @@
-import { NavLink, Link, Navigate, useNavigate } from 'react-router-dom';
-import classes from '../css/Navbar.module.css';
 import { useAuth } from '../utils/AuthContext';
 import logo from '../assets/images/D.png';
 
-
 function Navbar() {
-
-  const navigate = useNavigate();
-
   const { user, logoutUser } = useAuth();
 
   return (

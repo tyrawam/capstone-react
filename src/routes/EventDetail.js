@@ -51,7 +51,6 @@ function EventDetailPage() {
                 const ownerEmail = await db.users.list([Query.equal('accountID', response.ownerID)]);
                 if (ownerEmail.total > 0) {
                     setOwnerEmail(ownerEmail.documents[0].email);
-
                 }
             } catch (error) {
                 console.error("Failed to fetch event details:", error);
@@ -108,7 +107,7 @@ function EventDetailPage() {
                                 ? userDoc.events.filter(eventId => eventId !== event.$id)
                                 : [];
 
-                            // Create a new object without Appwrite metadeta to prevent error
+                            // Create a new object without Appwrite metadata to prevent error
                             const { $databaseId, $collectionId, ...updatedUserDoc } = {
                                 ...userDoc,
                                 events: updatedEvents,
@@ -141,7 +140,6 @@ function EventDetailPage() {
             await db.events.update(event.$id, eventPayload);
             setEvent(updatedEvent);
             setIsEditing(false);
-            console.log("Event updated successfully:", updatedEvent);
         } catch (error) {
             console.error("Failed to update event:", error);
         }
@@ -226,183 +224,188 @@ function EventDetailPage() {
         return times;
     };
 
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0];
+
     return (
         <>
             <h1>Event Details</h1>
 
             {event ? (
                 <>
-                    <div className="row">
-                        <div className="col-4 offset-2">
-                            <div className="card mb-3">
-                                <img className="card-img-top" src={event.image} alt="Card image cap" />
-                                <div className="card-body">
+                    <div className="container mt-5">
+                        <div className="row justify-content-around">
+                            <div className="col-md-6">
+                                <div className="card mb-3">
+                                    <img className="card-img-top" src={event.image} alt="Card image cap" />
+                                    <div className="card-body">
 
-                                    {isEditing ? (
-                                        <form
-                                            onSubmit={(e) => {
-                                                e.preventDefault();
+                                        {isEditing ? (
+                                            <form
+                                                onSubmit={(e) => {
+                                                    e.preventDefault();
 
-                                                const updatedSpots = parseInt(e.target.spots.value);
-                                                const registeredUsers = event.volunteerList.length;
+                                                    const updatedSpots = parseInt(e.target.spots.value);
+                                                    const registeredUsers = event.volunteerList.length;
 
-                                                if (updatedSpots < 1) {
-                                                    alert("You must have at least one spot available.");
-                                                    return;
-                                                }
-                                                
-                                                if (updatedSpots < registeredUsers) {
-                                                    alert("You cannot reduce the number of spots below the number of registered users.");
-                                                    return;
-                                                }
+                                                    if (updatedSpots < 1) {
+                                                        alert("You must have at least one spot available.");
+                                                        return;
+                                                    }
 
-                                                const updatedEvent = {
-                                                    ...event,
-                                                    title: e.target.title.value,
-                                                    body: e.target.body.value,
-                                                    location: e.target.location.value,
-                                                    lat: event.lat,
-                                                    lng: event.lng,
-                                                    spots: parseInt(e.target.spots.value),
-                                                    date: e.target.date.value,
-                                                    startTime: e.target.startTime.value,
-                                                };
-                                                handleEditSubmit(updatedEvent);
-                                            }}
-                                        >
-                                            <div className="input-group mb-3">
-                                                <span className="input-group-text">Title</span>
-                                                <input className="form-control" name="title" defaultValue={event.title} required />
-                                            </div>
+                                                    if (updatedSpots < registeredUsers) {
+                                                        alert("You cannot reduce the number of spots below the number of registered users.");
+                                                        return;
+                                                    }
 
-                                            <div className="input-group mb-3">
-                                                <span className="input-group-text">Desc.</span>
-                                                <textarea className="form-control" name="body" defaultValue={event.body} required />
-                                            </div>
-
-                                            <div className="input-group mb-3">
-                                                <span className="input-group-text">Location</span>
-                                                <div style={{ flex: 1 }}>
-                                                    <Autocomplete
-                                                        onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
-                                                        onPlaceChanged={handlePlaceChanged}
-                                                    >
-                                                        <input
-                                                            className="form-control"
-                                                            name="location"
-                                                            placeholder="Search for a location"
-                                                            defaultValue={event.location}
-                                                            required
-                                                        />
-                                                    </Autocomplete>
+                                                    const updatedEvent = {
+                                                        ...event,
+                                                        title: e.target.title.value,
+                                                        body: e.target.body.value,
+                                                        location: e.target.location.value,
+                                                        lat: event.lat,
+                                                        lng: event.lng,
+                                                        spots: parseInt(e.target.spots.value),
+                                                        date: e.target.date.value,
+                                                        startTime: e.target.startTime.value,
+                                                    };
+                                                    handleEditSubmit(updatedEvent);
+                                                }}
+                                            >
+                                                <div className="input-group mb-3">
+                                                    <span className="input-group-text">Title</span>
+                                                    <input className="form-control" name="title" defaultValue={event.title} required />
                                                 </div>
-                                            </div>
 
-                                            <div className="input-group mb-3">
-                                                <span className="input-group-text">Spots</span>
-                                                <input className="form-control" name="spots" defaultValue={event.spots} required />
-                                            </div>
+                                                <div className="input-group mb-3">
+                                                    <span className="input-group-text">Desc.</span>
+                                                    <textarea className="form-control" name="body" defaultValue={event.body} required />
+                                                </div>
 
-                                            <div className="input-group mb-3">
-                                                <span className="input-group-text">Date</span>
-                                                <input className="form-control" name="date" type="date" defaultValue={event.date} required />
-                                            </div>
+                                                <div className="input-group mb-3">
+                                                    <span className="input-group-text">Location</span>
+                                                    <div style={{ flex: 1 }}>
+                                                        <Autocomplete
+                                                            onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
+                                                            onPlaceChanged={handlePlaceChanged}
+                                                        >
+                                                            <input
+                                                                className="form-control"
+                                                                name="location"
+                                                                placeholder="Search for a location"
+                                                                defaultValue={event.location}
+                                                                required
+                                                            />
+                                                        </Autocomplete>
+                                                    </div>
+                                                </div>
+
+                                                <div className="input-group mb-3">
+                                                    <span className="input-group-text">Spots</span>
+                                                    <input className="form-control" name="spots" defaultValue={event.spots} required />
+                                                </div>
+
+                                                <div className="input-group mb-3">
+                                                    <span className="input-group-text">Date</span>
+                                                    <input className="form-control" name="date" type="date" defaultValue={event.date} min={today} required />
+                                                </div>
 
 
-                                            <div className="input-group mb-3">
-                                                <span className="input-group-text">Time</span>
-                                                <select name="startTime" className="form-control" defaultValue={event.startTime} required>
-                                                    {generateTimeOptions().map((time) => (
-                                                        <option key={time} value={time}>{time}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
+                                                <div className="input-group mb-3">
+                                                    <span className="input-group-text">Time</span>
+                                                    <select name="startTime" className="form-control" defaultValue={event.startTime} required>
+                                                        {generateTimeOptions().map((time) => (
+                                                            <option key={time} value={time}>{time}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
 
-                                            <button type="submit" className="btn btn-success me-3">Save</button>
-                                            <button type="button" className="btn btn-danger" onClick={() => setIsEditing(false)}>Cancel</button>
+                                                <button type="submit" className="btn btn-success me-3">Save</button>
+                                                <button type="button" className="btn btn-danger" onClick={() => setIsEditing(false)}>Cancel</button>
 
-                                        </form>
-                                    ) : (
-                                        <>
-                                            <h5 className="card-title"><b>{event.title}</b></h5>
-                                            <p className="card-text">{event.body}</p>
-                                            <ul className="list-group list-group-flush">
-                                                <li className="list-group-item">{event.location}</li>
-                                                <li className="list-group-item">{event.date} at {event.startTime}</li>
-                                                <li className="list-group-item text-secondary">Submitted by: {event.ownerName} {" "} 
-                                                    <a href={`mailto:${ownerEmail}?subject=Inquiry about your event: ${event.title}`}>{"(Send them an email!)"}</a></li>
+                                            </form>
+                                        ) : (
+                                            <>
+                                                <h5 className="card-title"><b>{event.title}</b></h5>
+                                                <p className="card-text">{event.body}</p>
+                                                <ul className="list-group list-group-flush">
+                                                    <li className="list-group-item">{event.location}</li>
+                                                    <li className="list-group-item">{event.date} at {event.startTime}</li>
+                                                    <li className="list-group-item text-secondary">Submitted by: {event.ownerName} {" "}
+                                                        <a href={`mailto:${ownerEmail}?subject=Inquiry about your event: ${event.title}`}>{"(Send them an email!)"}</a></li>
 
-                                            </ul>
-                                        </>
+                                                </ul>
+                                            </>
+                                        )}
+
+                                    </div>
+
+                                    {user.$id === event.ownerID && !isEditing && (
+                                        <button onClick={() => setIsEditing(true)}>
+                                            Edit Event
+                                        </button>
+                                    )}
+
+                                    {user.$id === event.ownerID && !isEditing && (
+                                        <div onClick={handleDelete}>
+                                            <DeleteIcon />
+                                        </div>
+                                    )}
+
+                                    {user.$id !== event.ownerID && event.volunteerList.length < event.spots && userDoc && !(userDoc.events || []).includes(event.$id) && (
+                                        <div>
+                                            <button onClick={() => handleRegister(eventID)}>Register for this event</button>
+                                        </div>
+                                    )}
+
+                                    {user.$id !== event.ownerID && userDoc && userDoc.events.includes(event.$id) && (
+                                        <div>
+                                            <button onClick={handleCancelRegistration}>Cancel Registration</button>
+                                        </div>
                                     )}
 
                                 </div>
-
-                                {user.$id === event.ownerID && !isEditing && (
-                                    <button onClick={() => setIsEditing(true)}>
-                                        Edit Event
-                                    </button>
-                                )}
-
-                                {user.$id === event.ownerID && !isEditing && (
-                                    <div onClick={handleDelete}>
-                                        <DeleteIcon />
-                                    </div>
-                                )}
-
-                                {user.$id !== event.ownerID && event.volunteerList.length < event.spots && userDoc && !(userDoc.events || []).includes(event.$id) && (
-                                    <div>
-                                        <button onClick={() => handleRegister(eventID)}>Register for this event</button>
-                                    </div>
-                                )}
-
-                                {user.$id !== event.ownerID && userDoc && (userDoc.events || []).includes(event.$id) && (
-                                    <div>
-                                        <button onClick={handleCancelRegistration}>Cancel Registration</button>
-                                    </div>
-                                )}
-
                             </div>
-                        </div>
 
-                        {/* Event Detail List */}
+                            {/* Event Detail List */}
 
-                        <div className="col-4">
-                            <EventDetailList volunteerList={event.volunteerList} spots={event.spots} />
-                            <div className="mt-5" style={{ height: '400px', width: '100%' }}>
-                                <GoogleMap
-                                    mapContainerStyle={{ width: '100%', height: '100%' }}
-                                    center={{
-                                        lat: event.lat || 0,
-                                        lng: event.lng || 0,
-                                    }}
-                                    zoom={15}
-                                >
-                                    <Marker
-                                        position={{
+                            <div className="col-md-6">
+                                <EventDetailList volunteerList={event.volunteerList} spots={event.spots} />
+                                <div className="mt-5" style={{ height: '400px', width: '100%' }}>
+                                    <GoogleMap
+                                        mapContainerStyle={{ width: '100%', height: '100%' }}
+                                        center={{
                                             lat: event.lat || 0,
                                             lng: event.lng || 0,
                                         }}
-                                    />
-                                </GoogleMap>
-                            </div>
+                                        zoom={15}
+                                    >
+                                        <Marker
+                                            position={{
+                                                lat: event.lat || 0,
+                                                lng: event.lng || 0,
+                                            }}
+                                        />
+                                    </GoogleMap>
+                                </div>
 
-                            {/* Get Directions Button */}
-                            <div className="mt-3">
-                                <a
-                                    href={`https://www.google.com/maps/dir/?api=1&destination=${event.lat},${event.lng}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="btn btn-primary"
-                                >
-                                    Get Directions
-                                </a>
+                                {/* Get Directions Button */}
+                                <div className="mt-3">
+                                    <a
+                                        href={`https://www.google.com/maps/dir/?api=1&destination=${event.lat},${event.lng}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="btn btn-primary"
+                                    >
+                                        Get Directions
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </>
             ) : (
-                <p>Loading...</p>
+                <div className="vh-100 d-flex justify-content-center align-items-center"><p>Loading...</p></div>
             )}
             <p><Link to='..' relative='path' className="btn btn-secondary">Back</Link></p>
         </>

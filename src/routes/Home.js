@@ -8,7 +8,7 @@ function HomePage() {
         <div className="vh-100 bg-dark text-white d-flex align-items-center justify-content-start" style={{ backgroundImage: "url('/priscilla-du-preez-HVqJdMdfgic-unsplash.jpg')", backgroundSize: "cover", backgroundPosition: "center" }}>
             <div className="bg-dark bg-opacity-75 p-5 rounded text-center ms-5">
                 <h1 className="mb-4">Welcome to Disc Golf Volunteer</h1>
-                <p className="mb-4">Discover, create, and join volunteering events near you!</p>
+                <p className="mb-4">Create, discover and join volunteering events near you!</p>
                 <div>
                     { user ? (
                         <Link to="/events" className="btn btn-primary me-3">View Events</Link>

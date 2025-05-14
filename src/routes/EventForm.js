@@ -20,7 +20,6 @@ function EventFormPage() {
 
     };
 
-    
     return (
         <div className="container mt-5">
             <EventForm setEvents={setEvents} />
@@ -28,4 +27,4 @@ function EventFormPage() {
     )
 };
 
-    export default EventFormPage;
+export default EventFormPage;

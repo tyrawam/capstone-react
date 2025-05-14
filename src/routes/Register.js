@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../utils/AuthContext'
 import basketImage from '../assets/images/priscilla-du-preez-h0P-00OHYkU-unsplash.jpg'
@@ -40,7 +40,7 @@ const RegisterPage = () => {
                             <div className="card" >
                                 <img className="card-img-top" src={basketImage} alt="Card image cap" />
                                 <div className="card-body">
-                                    <h5 className="card-title">Sign Up</h5> 
+                                    <h5 className="card-title">Sign Up</h5>
                                     <form ref={registerForm} onSubmit={handleSubmit} >
 
                                         {/* Name Input */}

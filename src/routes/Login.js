@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../utils/AuthContext'
 import basketImage from '../assets/images/priscilla-du-preez-A5VAioqUHH4-unsplash.jpg'
@@ -54,7 +54,7 @@ const LoginPage = () => {
 
                     {/* Password Input */}
                     <div className="form-outline mb-4">
-                    <div className="d-flex align-items-start"><label className="form-label" id="password">Password:</label></div>
+                      <div className="d-flex align-items-start"><label className="form-label" id="password">Password:</label></div>
                       <input
                         required
                         className="form-control"
@@ -70,9 +70,9 @@ const LoginPage = () => {
                     <button className="btn btn-primary w-100">Login</button>
                   </form>
                 </div>
-                {/* <div className="text-center"> */}
-                  <p>Don't have an account? <Link to="/register">Register</Link></p>
-                {/* </div> */}
+
+                <p>Don't have an account? <Link to="/register">Register</Link></p>
+
               </div>
             </div>
           </div>

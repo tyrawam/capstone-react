@@ -5,7 +5,6 @@ function Event({ eventData }) {
     // initial state
     const [event] = useState(eventData)
 
-
     return (
         <div className="card mb-3">
             <div className="card-body d-flex justify-content-between align-items-center">

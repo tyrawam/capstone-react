@@ -20,6 +20,7 @@ function AccountPage() {
 
                     // Check if the user has registered events
                     if (eventsList && eventsList.length > 0) {
+                        
                         // Fetch details of each registered event
                         const events = await Promise.all(
                             eventsList.map(async (eventId) => {

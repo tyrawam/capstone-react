@@ -1,4 +1,3 @@
-import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './css/App.css';
 
@@ -31,7 +30,6 @@ const router = createBrowserRouter([
           { path: '/', 
             element: <ProtectedRoutes />, 
             children: [
-              { index: true, element: <HomePage /> },
               { path: 'account', element: <AccountPage /> },
               { path: 'events', element: <EventsPage /> },
               { path: 'events/form', element: <EventFormPage /> },
